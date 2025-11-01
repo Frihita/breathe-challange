@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Challenge - The 30-Second Breath Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0B0016;
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .challenge-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(90deg, #FF00CC, #00FFFF);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(255, 0, 204, 0.5);
+        }
+
+        .card-container {
+            width: 400px;
+            height: 500px;
+            perspective: 1000px;
+            position: relative;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.8s;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(11, 0, 22, 0.9), rgba(30, 0, 50, 0.9));
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .card-face::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 14px;
+            padding: 2px;
+            background: linear-gradient(135deg, #FF00CC, #00FFFF);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            z-index: -1;
+        }
+
+        .card-front {
+            z-index: 2;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        .card-content {
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .challenge-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #FF00CC, #00FFFF);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .challenge-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .start-button {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(90deg, #FF00CC, #00FFFF);
+            color: #0B0016;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-button:hover {
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.7), 0 0 30px rgba(0, 255, 255, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .breathing-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .breathing-ring {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            background: linear-gradient(135deg, #FF00CC, #00FFFF);
+            -webkit-mask: radial-gradient(transparent 60%, black 60%);
+            mask: radial-gradient(transparent 60%, black 60%);
+            opacity: 0.8;
+        }
+
+        .breathing-ring.active {
+            animation: breathe 8s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .timer-ring {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timer-ring-progress {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: #00FFFF;
+            transform: rotate(-90deg);
+            transition: stroke-dasharray 1s linear;
+        }
+
+        .timer-text {
+            position: absolute;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .completion-message {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        .completion-message.show {
+            opacity: 1;
+        }
+
+        .restart-button {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(90deg, #FF00CC, #00FFFF);
+            color: #0B0016;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 30px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .restart-button.show {
+            opacity: 1;
+        }
+
+        .restart-button:hover {
+            box-shadow: 0 0 20px rgba(255, 0, 204, 0.7), 0 0 30px rgba(0, 255, 255, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .breathing-text {
+            position: absolute;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            bottom: 60px;
+            text-align: center;
+            width: 100%;
+        }
+
+        @media (max-width: 440px) {
+            .card-container {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .challenge-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="challenge-title">Mini Challenge</h1>
+    
+    <div class="card-container">
+        <div class="card" id="breathCard">
+            <!-- Front of card -->
+            <div class="card-face card-front">
+                <div class="card-content">
+                    <h2 class="challenge-name">The 30-Second Breath Test</h2>
+                    <p class="challenge-description">Take a mindful breath. Inhale… exhale… follow the rhythm.</p>
+                    <button class="start-button" id="startButton">Start Challenge</button>
+                </div>
+            </div>
+            
+            <!-- Back of card -->
+            <div class="card-face card-back">
+                <div class="card-content">
+                    <div class="breathing-container">
+                        <div class="timer-ring"></div>
+                        <svg class="timer-ring-progress" width="250" height="250">
+                            <circle cx="125" cy="125" r="123" fill="none" stroke="url(#gradient)" stroke-width="2" 
+                                    stroke-dasharray="773" stroke-dashoffset="773" id="progressCircle"></circle>
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#FF00CC" />
+                                    <stop offset="100%" stop-color="#00FFFF" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="breathing-ring" id="breathingRing"></div>
+                        <div class="timer-text" id="timerText">30</div>
+                    </div>
+                    <div class="breathing-text" id="breathingText">Inhale...</div>
+                    <div class="completion-message" id="completionMessage">You just gave your body 30 seconds of peace.</div>
+                    <button class="restart-button" id="restartButton">Breathe Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const card = document.getElementById('breathCard');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const breathingRing = document.getElementById('breathingRing');
+        const timerText = document.getElementById('timerText');
+        const breathingText = document.getElementById('breathingText');
+        const completionMessage = document.getElementById('completionMessage');
+        const progressCircle = document.getElementById('progressCircle');
+        
+        let countdown;
+        let breathingInterval;
+        let timeLeft = 30;
+        let isRunning = false;
+        
+        // Flip card when start button is clicked
+        startButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            card.classList.add('flipped');
+            startChallenge();
+        });
+        
+        // Prevent card flip when clicking on the back of the card
+        document.querySelector('.card-back').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Restart challenge
+        restartButton.addEventListener('click', function() {
+            resetChallenge();
+            startChallenge();
+        });
+        
+        function startChallenge() {
+            if (isRunning) return;
+            isRunning = true;
+            
+            // Reset UI elements
+            timeLeft = 30;
+            timerText.textContent = timeLeft;
+            breathingRing.classList.add('active');
+            completionMessage.classList.remove('show');
+            restartButton.classList.remove('show');
+            
+            // Start breathing text animation
+            let breathingPhase = 0;
+            const breathingPhases = ['Inhale...', 'Hold...', 'Exhale...', 'Hold...'];
+            
+            breathingInterval = setInterval(() => {
+                breathingText.textContent = breathingPhases[breathingPhase];
+                breathingPhase = (breathingPhase + 1) % breathingPhases.length;
+            }, 2000);
+            
+            // Start countdown
+            countdown = setInterval(() => {
+                timeLeft--;
+                timerText.textContent = timeLeft;
+                
+                // Update progress circle
+                const offset = 773 - (773 * (30 - timeLeft) / 30);
+                progressCircle.style.strokeDashoffset = offset;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    clearInterval(breathingInterval);
+                    isRunning = false;
+                    
+                    // Show completion message
+                    setTimeout(() => {
+                        breathingRing.classList.remove('active');
+                        timerText.style.opacity = '0';
+                        breathingText.style.opacity = '0';
+                        completionMessage.classList.add('show');
+                        restartButton.classList.add('show');
+                    }, 500);
+                }
+            }, 1000);
+        }
+        
+        function resetChallenge() {
+            clearInterval(countdown);
+            clearInterval(breathingInterval);
+            isRunning = false;
+            timeLeft = 30;
+            
+            // Reset UI elements
+            timerText.textContent = timeLeft;
+            timerText.style.opacity = '1';
+            breathingText.style.opacity = '1';
+            breathingText.textContent = 'Inhale...';
+            breathingRing.classList.remove('active');
+            completionMessage.classList.remove('show');
+            restartButton.classList.remove('show');
+            
+            // Reset progress circle
+            progressCircle.style.strokeDashoffset = 773;
+        }
+    </script>
+</body>
+</html>
